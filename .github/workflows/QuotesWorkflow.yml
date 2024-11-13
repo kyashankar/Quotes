@@ -1,0 +1,29 @@
+name: Build code ad deploy to Azure
+
+on: [push]
+
+jobs:
+  build:
+    name: Build Code
+    runs-on: Windows
+
+    steps:
+    -  uses: actions/checkout@v1
+    -  name: Setup ASP Web
+       uses: actions/setup-dotnet@v1
+       with: 
+         dotnet-version: 4.7.2
+    - name: Build with dotnet
+      run: dotnet build --configuration Release
+
+    deploy:
+      needs: build
+      name: Deploy App
+      runs-on: Windows
+
+      steps:
+      - name: deploy to azure web app
+        uses: azure/appservice-actions/RPNCTest1
+        with: 
+          app-name: 
+          publish-profile: ${{ secrets.azureWebAppPublishProfile }}
