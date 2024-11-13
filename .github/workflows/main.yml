@@ -1,0 +1,39 @@
+name: Publish
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+    - main
+
+jobs: 
+  publish:
+    runs-on: Windows
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '4.7.1'
+
+      - name: Restore
+        run: dotnet restore ./Quotes.sln
+
+      - name: Build
+        run: dotnet build ./Quotes.sln --configuration Release --no-restore
+        
+      - name: Build
+        run: dotnet build ./Quotes.sln --configuration Release --no-restore
+
+      - name: Publish
+        run: dotnet publish ./Quotes.sln --configuration Release --no-build --output '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}'
+
+      - name: Deployment
+        uses: actions/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ''
+          package: "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
+  
