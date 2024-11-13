@@ -1,29 +1,28 @@
-name: Build code ad deploy to Azure
+name: Publish
 
-on: [push]
+on: 
+  workflow_dispatch:
+  push:
+    branches:
+    -  main
 
 jobs:
-  build:
-    name: Build Code
-    runs-on: Windows
-
+  publish:
+    runs-on: ubuntu-latest
+    
     steps:
-    -  uses: actions/checkout@v1
-    -  name: Setup ASP Web
-       uses: actions/setup-dotnet@v1
-       with: 
-         dotnet-version: 4.7.2
-    - name: Build with dotnet
-      run: dotnet build --configuration Release
+      - uses: actions/checkout@v3
 
-    deploy:
-      needs: build
-      name: Deploy App
-      runs-on: Windows
+      - name: Setup .Net
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
 
-      steps:
-      - name: deploy to azure web app
-        uses: azure/appservice-actions/RPNCTest1
-        with: 
-          app-name: 
-          publish-profile: ${{ secrets.azureWebAppPublishProfile }}
+      - name: Restore
+        run: dotnet restore ./Quotes.sln
+
+      - name: Build
+        run: dotnet build ./Quotes.sln --configuration Release --no-restore
+
+      - name: Publish
+        run: dotnet publish ./Quotes.sln --configuration Release --no-build
